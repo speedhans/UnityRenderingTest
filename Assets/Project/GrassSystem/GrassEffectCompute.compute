@@ -1,0 +1,17 @@
+﻿#pragma kernel CSGrassEffect
+
+#include "GrassPositionCal.hlsl"
+
+RWTexture2D<float4> _EffectMapTexture;
+Texture2D _EffectNewSourceTexture;
+float _DeltaTime;
+float _ResetSpeed;
+
+[numthreads(32,32,1)]
+void CSGrassEffect(uint3 id : SV_DispatchThreadID)
+{
+	float4 before = _EffectMapTexture[id.xy];
+	before.w -= _DeltaTime * _ResetSpeed;
+	before += _EffectNewSourceTexture[id.xy];
+	_EffectMapTexture[id.xy] = before;
+}

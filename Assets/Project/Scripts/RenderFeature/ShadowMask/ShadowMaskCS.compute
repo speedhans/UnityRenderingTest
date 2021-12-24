@@ -1,0 +1,76 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel ShadowMaskCS
+#pragma kernel ShadowMaskBlurCS
+
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+
+#include "CustomShadowMaskHelper.hlsl"
+
+//#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+//#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+//#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+
+float CameraFar;
+
+half2 AddedUV(half2 index, half2 Offset)
+{
+    return index + Offset / _TextureSize;
+}
+
+half2 _uvOffset[4] =
+{
+    half2(0, 1),
+    half2(0, -1),
+    half2(1, 0),
+    half2(-1, 0),
+    //half2(1, 1),
+    //half2(1, -1),
+    //half2(-1, 1),
+    //half2(-1, -1),
+};
+
+half ComputeShadowEdge(half2 pixelPos)
+{
+    half atten = SampleShadowAttenuation(pixelPos / _TextureSize);
+    [unroll] for (int i = 0; i < 4; ++i)
+    {
+        atten += SampleShadowAttenuation((pixelPos + _uvOffset[i]) / _TextureSize);
+    }
+
+    atten /= 5;
+
+    return (atten < 0.8f && atten > 0.2f) ? 1 : 0;
+}
+
+[numthreads(32,32,1)]
+void ShadowMaskCS(uint3 id : SV_DispatchThreadID)
+{
+    [unroll] for (int i = 0; i < 4; ++i)
+    {
+        half attenuation = ComputeShadowEdge(id.xy + i * 4);
+        _MaskTexture[id.xy + i * 4] = attenuation;
+    }
+    //half attenuation = ComputeShadowEdge(id.xy);
+    //_MaskTexture[id.xy] = attenuation;
+}
+
+
+[numthreads(32,32,1)]
+void ShadowMaskBlurCS(uint3 id : SV_DispatchThreadID)
+{
+    half2 index = id.xy;
+    half offset = 0.00085f;
+
+    float color = _MaskTexture[index + half2(offset, offset) * _TextureSize];
+    color += _MaskTexture[index + half2(offset, offset) * _TextureSize];
+    color += _MaskTexture[index + half2(offset, -offset) * _TextureSize];
+    color += _MaskTexture[index + half2(-offset, offset) * _TextureSize];
+    color += _MaskTexture[index + half2(-offset, -offset) * _TextureSize];
+    color /= 5;
+    
+    _MaskTexture[index] = step(0.2, color);
+}
