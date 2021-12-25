@@ -49,7 +49,7 @@
             #pragma multi_compile_fog
             #pragma multi_compile_instancing
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl" // URP 코어 코드
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl" // URP 빛 관련 코드
+            #include "Assets/Project/Shaders/Lighting/Lighting_c.hlsl" // URP 빛 관련 코드
             #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl" // SurfaceData 등 UPR의 기본 데이터를 받아올때 사용되는 듯?
             #include "Assets/Project/Shaders/CustomFuntion.hlsl"
 

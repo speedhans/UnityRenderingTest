@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -52,9 +52,6 @@
     <UnityBuildTarget>Android:13</UnityBuildTarget>
     <UnityVersion>2021.2.7f1</UnityVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <Analyzer Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Store\RPG Character Animation Pack\Code\CameraController.cs" />
     <Compile Include="Assets\Project\Scripts\RenderFeature\ShadowMask\ShadowMaskManager.cs" />
@@ -115,21 +112,27 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Project\Scripts\RenderFeature\ShadowMask\MaskBlur\ShadowMaskDebugShader.shader" />
+    <None Include="Assets\Project\Shaders\Lighting\RealtimeLights_c.hlsl" />
     <None Include="Assets\Project\Scripts\RenderFeature\ShadowMask\CustomShadowMaskHelper.hlsl" />
     <None Include="Assets\Project\Shaders\CustomFuntion.hlsl" />
+    <None Include="Assets\Project\Shaders\Lighting\TerrainLit_c.shader" />
     <None Include="Assets\Project\Scripts\RenderFeature\ShadowMask\ShadowMaskCS.compute" />
     <None Include="Assets\Project\Scripts\Effect\RefractionEffectShader.shader" />
     <None Include="Assets\Project\Shaders\URP Toon Shader.shader" />
     <None Include="Assets\Project\Scripts\RenderFeature\Blit\BlitTestShader.shader" />
     <None Include="Assets\Project\GrassSystem\GrassPositionCal.hlsl" />
     <None Include="Assets\Project\GrassSystem\GeometryGrassShader.shader" />
+    <None Include="Assets\Project\Shaders\Lighting\Lighting_c.hlsl" />
     <None Include="Assets\Project\GrassSystem\CullingCompute.compute" />
+    <None Include="Assets\Project\Shaders\Lighting\GlobalIllumination_c.hlsl" />
     <None Include="Assets\Store\SD Unity-Chan Haon Custom\Shader\readme.txt" />
+    <None Include="Assets\Project\Shaders\Lighting\TerrainLitPasses_c.hlsl" />
     <None Include="Assets\Project\GrassSystem\Tools\GeometryGassMask.compute" />
     <None Include="Assets\Project\Shaders\CustomSurfaceInput.hlsl" />
     <None Include="Assets\Store\SD Unity-Chan Haon Custom\Shader\Unitychan_chara_eye.shader" />
     <None Include="Assets\Project\GrassSystem\GrassEffectCompute.compute" />
     <None Include="Assets\Store\SD Unity-Chan Haon Custom\_Readme\Readme SD Unity-Chan Haon Custom Series.txt" />
+    <None Include="Assets\Project\Shaders\Lighting\Shadow_c.hlsl" />
     <None Include="Assets\Store\RPG Character Animation Pack\SuperCharacterController\Code\SuperCharacterController\README.txt" />
     <None Include="Assets\Project\Shaders\URP OutLine Shader.shader" />
     <None Include="Assets\Project\GrassSystem\GrassCalculator.hlsl" />

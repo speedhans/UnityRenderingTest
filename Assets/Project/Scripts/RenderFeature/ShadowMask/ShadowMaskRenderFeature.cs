@@ -31,10 +31,11 @@ public class ShadowMaskRenderFeature : ScriptableRendererFeature
 				m_RenderTexture.Release();
 			}
 			
-			Debug.LogFormat("Screen Size: {0}  ,  {1}", Screen.width, Screen.height);
-
 			m_RenderTexture = new RenderTexture(Screen.width / 2, Screen.height / 2, 0, RenderTextureFormat.R8);//new RenderTexture(Screen.width / 2, Screen.height / 2, 0, RenderTextureFormat.R8);
 			m_RenderTexture.enableRandomWrite = true;
+
+			Debug.LogFormat("Screen Size: {0}  ,  {1}", Screen.width, Screen.height);
+			Debug.LogFormat("MaskBuffer Size: {0}  ,  {1}", m_RenderTexture.width, m_RenderTexture.height);
 
 			ShadowMaskManager.Instance.SetMaskTexture(m_RenderTexture);
 		}
