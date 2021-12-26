@@ -241,7 +241,7 @@ half3 CalculateBlinnPhong(Light light, InputData inputData, SurfaceData surfaceD
 ////////////////////////////////////////////////////////////////////////////////
 /// PBR lighting...
 ////////////////////////////////////////////////////////////////////////////////
-half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData, half4 clipPos)
+half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData, half2 screenUV)
 {
     #if defined(_SPECULARHIGHLIGHTS_OFF)
     bool specularHighlightsOff = true;
@@ -267,7 +267,7 @@ half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData, half4 c
     half4 shadowMask = CalculateShadowMask(inputData);
     AmbientOcclusionFactor aoFactor = CreateAmbientOcclusionFactor(inputData, surfaceData);
     uint meshRenderingLayers = GetMeshRenderingLightLayer();
-    Light mainLight = GetMainLight(inputData, clipPos, shadowMask, aoFactor);
+    Light mainLight = GetMainLight(inputData, screenUV, shadowMask, aoFactor);
 
     // NOTE: We don't apply AO to the GI here because it's done in the lighting calculation below...
     MixRealtimeAndBakedGI(mainLight, inputData.normalWS, inputData.bakedGI);
@@ -292,7 +292,7 @@ half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData, half4 c
     #if USE_CLUSTERED_LIGHTING
     for (uint lightIndex = 0; lightIndex < min(_AdditionalLightsDirectionalCount, MAX_VISIBLE_LIGHTS); lightIndex++)
     {
-        Light light = GetAdditionalLight(lightIndex, inputData, clipPos, shadowMask, aoFactor);
+        Light light = GetAdditionalLight(lightIndex, inputData, screenUV, shadowMask, aoFactor);
 
         if (IsMatchingLightLayer(light.layerMask, meshRenderingLayers))
         {
@@ -304,7 +304,7 @@ half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData, half4 c
     #endif
 
     LIGHT_LOOP_BEGIN(pixelLightCount)
-        Light light = GetAdditionalLight(lightIndex, inputData, clipPos, shadowMask, aoFactor);
+        Light light = GetAdditionalLight(lightIndex, inputData, screenUV, shadowMask, aoFactor);
 
         if (IsMatchingLightLayer(light.layerMask, meshRenderingLayers))
         {
@@ -323,7 +323,7 @@ half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData, half4 c
 }
 
 // Deprecated: Use the version which takes "SurfaceData" instead of passing all of these arguments...
-half4 UniversalFragmentPBR(InputData inputData, half4 clipPos, half3 albedo, half metallic, half3 specular,
+half4 UniversalFragmentPBR(InputData inputData, half2 screenUV, half3 albedo, half metallic, half3 specular,
     half smoothness, half occlusion, half3 emission, half alpha)
 {
     SurfaceData surfaceData;
@@ -339,13 +339,13 @@ half4 UniversalFragmentPBR(InputData inputData, half4 clipPos, half3 albedo, hal
     surfaceData.clearCoatMask = 0;
     surfaceData.clearCoatSmoothness = 1;
 
-    return UniversalFragmentPBR(inputData, surfaceData, clipPos);
+    return UniversalFragmentPBR(inputData, surfaceData, screenUV);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Phong lighting...
 ////////////////////////////////////////////////////////////////////////////////
-half4 UniversalFragmentBlinnPhong(InputData inputData, SurfaceData surfaceData, half4 clipPos)
+half4 UniversalFragmentBlinnPhong(InputData inputData, SurfaceData surfaceData, half2 screenUV)
 {
     #if defined(DEBUG_DISPLAY)
     half4 debugColor;
@@ -359,7 +359,7 @@ half4 UniversalFragmentBlinnPhong(InputData inputData, SurfaceData surfaceData, 
     uint meshRenderingLayers = GetMeshRenderingLightLayer();
     half4 shadowMask = CalculateShadowMask(inputData);
     AmbientOcclusionFactor aoFactor = CreateAmbientOcclusionFactor(inputData, surfaceData);
-    Light mainLight = GetMainLight(inputData, clipPos, shadowMask, aoFactor);
+    Light mainLight = GetMainLight(inputData, screenUV, shadowMask, aoFactor);
 
     MixRealtimeAndBakedGI(mainLight, inputData.normalWS, inputData.bakedGI, aoFactor);
 
@@ -377,7 +377,7 @@ half4 UniversalFragmentBlinnPhong(InputData inputData, SurfaceData surfaceData, 
     #if USE_CLUSTERED_LIGHTING
     for (uint lightIndex = 0; lightIndex < min(_AdditionalLightsDirectionalCount, MAX_VISIBLE_LIGHTS); lightIndex++)
     {
-        Light light = GetAdditionalLight(lightIndex, inputData, clipPos, shadowMask, aoFactor);
+        Light light = GetAdditionalLight(lightIndex, inputData, screenUV, shadowMask, aoFactor);
         if (IsMatchingLightLayer(light.layerMask, meshRenderingLayers))
         {
             lightingData.additionalLightsColor += CalculateBlinnPhong(light, inputData, surfaceData);
@@ -386,7 +386,7 @@ half4 UniversalFragmentBlinnPhong(InputData inputData, SurfaceData surfaceData, 
     #endif
 
     LIGHT_LOOP_BEGIN(pixelLightCount)
-        Light light = GetAdditionalLight(lightIndex, inputData, clipPos, shadowMask, aoFactor);
+        Light light = GetAdditionalLight(lightIndex, inputData, screenUV, shadowMask, aoFactor);
         if (IsMatchingLightLayer(light.layerMask, meshRenderingLayers))
         {
             lightingData.additionalLightsColor += CalculateBlinnPhong(light, inputData, surfaceData);
@@ -402,7 +402,7 @@ half4 UniversalFragmentBlinnPhong(InputData inputData, SurfaceData surfaceData, 
 }
 
 // Deprecated: Use the version which takes "SurfaceData" instead of passing all of these arguments...
-half4 UniversalFragmentBlinnPhong(InputData inputData, half4 clipPos, half3 diffuse, half4 specularGloss, half smoothness, half3 emission, half alpha, half3 normalTS)
+half4 UniversalFragmentBlinnPhong(InputData inputData, half2 screenUV, half3 diffuse, half4 specularGloss, half smoothness, half3 emission, half alpha, half3 normalTS)
 {
     SurfaceData surfaceData;
 
@@ -417,7 +417,7 @@ half4 UniversalFragmentBlinnPhong(InputData inputData, half4 clipPos, half3 diff
     surfaceData.clearCoatSmoothness = 1;
     surfaceData.normalTS = normalTS;
 
-    return UniversalFragmentBlinnPhong(inputData, surfaceData, clipPos);
+    return UniversalFragmentBlinnPhong(inputData, surfaceData, screenUV);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

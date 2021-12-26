@@ -3,7 +3,6 @@ Shader "Custom/ShadowMaskDebugShader"
     Properties
     {
         _MainTex("Texture", 2D) = "white" {}
-        _ShadowMaskTexture("ShadowMask", 2D) = "white" {}
     }
     SubShader
     {

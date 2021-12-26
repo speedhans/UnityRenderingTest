@@ -34,6 +34,7 @@ MonoBehaviour:
   m_Setting:
     m_Pass: 100
     m_ComputeShader: {fileID: 7200000, guid: f3d8f606121691a4886fb9994ed98932, type: 3}
+    m_BlurOffset: 1.64
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0

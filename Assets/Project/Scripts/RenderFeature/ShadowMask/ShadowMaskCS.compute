@@ -19,6 +19,8 @@ half2 _uvOffset[4] =
     //half2(-1, -1),
 };
 
+float _BlurOffset;
+
 half ComputeShadowEdge(half2 pixelPos)
 {
     half atten = SampleShadowAttenuation(pixelPos / _TextureSize);
@@ -49,14 +51,18 @@ void ShadowMaskCS(uint3 id : SV_DispatchThreadID)
 void ShadowMaskBlurCS(uint3 id : SV_DispatchThreadID)
 {
     half2 index = id.xy;
-    half offset = 0.00085f;
+    half offset = _BlurOffset;
 
     float color = _MaskTexture[index + half2(offset, offset) * _TextureSize];
     color += _MaskTexture[index + half2(offset, offset) * _TextureSize];
     color += _MaskTexture[index + half2(offset, -offset) * _TextureSize];
     color += _MaskTexture[index + half2(-offset, offset) * _TextureSize];
     color += _MaskTexture[index + half2(-offset, -offset) * _TextureSize];
-    color /= 5;
+    offset *= 0.75;
+    color += _MaskTexture[index + half2(0, offset) * _TextureSize];
+    color += _MaskTexture[index + half2(offset, 0) * _TextureSize];
+    color += _MaskTexture[index + half2(-0, -offset) * _TextureSize];
+    color += _MaskTexture[index + half2(-offset, 0) * _TextureSize];
     
-    _MaskTexture[index] = step(0.2, color);
+    _MaskTexture[index] = color;// step(0.01, color);
 }

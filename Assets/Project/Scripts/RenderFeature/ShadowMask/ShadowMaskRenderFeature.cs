@@ -11,17 +11,20 @@ public class ShadowMaskRenderFeature : ScriptableRendererFeature
     {
 		public RenderPassEvent m_Pass;
 		public ComputeShader m_ComputeShader;
+		[Range(0, 10)] public float m_BlurOffset;
     }
 
     public class ShadowMaskRenderFeaturePass : ScriptableRenderPass
     {
 		MaskSetting m_Setting;
 		RenderTexture m_RenderTexture;
+		float m_BlurOffset;
 
 		public ShadowMaskRenderFeaturePass(MaskSetting InSetting)
 		{
 			this.renderPassEvent = InSetting.m_Pass;
 			this.m_Setting = InSetting;
+			this.m_BlurOffset = InSetting.m_BlurOffset * 0.001f;
 		}
 
 		public void Setup()
@@ -50,7 +53,8 @@ public class ShadowMaskRenderFeature : ScriptableRendererFeature
 			m_Setting.m_ComputeShader.Dispatch(0, m_RenderTexture.width / 32, m_RenderTexture.height / 32, 1);
 
 			m_Setting.m_ComputeShader.SetTexture(1, "_MaskTexture", m_RenderTexture);
-			m_Setting.m_ComputeShader.Dispatch(1, m_RenderTexture.width / 4 / 32, m_RenderTexture.height / 4 / 32, 1);
+			m_Setting.m_ComputeShader.SetFloat("_BlurOffset", m_BlurOffset);
+			m_Setting.m_ComputeShader.Dispatch(1, m_RenderTexture.width / 32, m_RenderTexture.height / 32, 1);
 			
 			Shader.SetGlobalTexture("_ShadowMaskTexture", m_RenderTexture, RenderTextureSubElement.Color);
 		}
