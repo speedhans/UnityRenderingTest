@@ -116,7 +116,7 @@
             half4 frag(Varyings v) : SV_Target
             {
 //#ifdef _MAIN_LIGHT_SHADOWS 
-                Light mainLight = GetMainLight(v.shadowCoord);
+                Light mainLight = GetMainLight(v.shadowCoord, v.positionCS);
 //#else
 //                Light mainLight = GetMainLight();
 //#endif

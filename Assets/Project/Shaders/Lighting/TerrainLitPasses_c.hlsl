@@ -416,7 +416,7 @@ half4 SplatmapFragment(Varyings IN) : SV_TARGET
 
 #else
 
-    half4 color = UniversalFragmentPBR(inputData, albedo, metallic, /* specular */ half3(0.0h, 0.0h, 0.0h), smoothness, occlusion, /* emission */ half3(0, 0, 0), alpha);
+    half4 color = UniversalFragmentPBR(inputData, IN.clipPos, albedo, metallic, /* specular */ half3(0.0h, 0.0h, 0.0h), smoothness, occlusion, /* emission */ half3(0, 0, 0), alpha);
 
     SplatmapFinalColor(color, inputData.fogCoord);
 

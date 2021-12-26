@@ -33,8 +33,8 @@ Shader "Custom/ShadowMaskDebugShader"
 
             CBUFFER_START(UnityPerMaterial)
             TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex); half4 _MainTex_ST;
-            TEXTURE2D(_ShadowMaskTexture); SAMPLER(sampler_ShadowMaskTexture); half4 _ShadowMaskTexture_ST;
             CBUFFER_END
+            TEXTURE2D(_ShadowMaskTexture); SAMPLER(sampler_ShadowMaskTexture); half4 _ShadowMaskTexture_ST;
 
             v2f vert (vertexData v)
             {

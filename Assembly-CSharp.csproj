@@ -109,6 +109,7 @@
     <Compile Include="Assets\Store\RPG Character Animation Pack\SuperCharacterController\Code\SuperCharacterController\Core\BruteForceMesh.cs" />
     <Compile Include="Assets\Store\RPG Character Animation Pack\SuperCharacterController\Code\SuperCharacterController\Core\SuperCharacterController.cs" />
     <Compile Include="Assets\Project\Scripts\GameManager.cs" />
+    <Compile Include="Assets\Project\Scripts\UnityChanGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Project\Scripts\RenderFeature\ShadowMask\MaskBlur\ShadowMaskDebugShader.shader" />

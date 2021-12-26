@@ -31,7 +31,7 @@ public class GameManager : MonoBehaviour
 #if UNITY_EDITOR
 
 #else
-        Application.targetFrameRate = 45;
+        Application.targetFrameRate = 60;
 #endif
     }
 

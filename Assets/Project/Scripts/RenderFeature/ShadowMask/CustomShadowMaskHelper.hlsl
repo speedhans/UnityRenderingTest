@@ -6,7 +6,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 
 
-RWTexture2D<float> _MaskTexture;
+RWTexture2D<float4> _MaskTexture;
 float2 _TextureSize;
 
 float LinearEyeDepth_(float In)

@@ -22,6 +22,8 @@ public class CameraManager : MonoBehaviour
     private void Start()
     {
         UIManager.Instance.GetTouchLayer().AddDrageCallback(TouchEvent);
+
+        TouchEvent(new Vector2(0, 0.00001f));
     }
 
     void CameraUpdate(CinemachineBrain _Brain)

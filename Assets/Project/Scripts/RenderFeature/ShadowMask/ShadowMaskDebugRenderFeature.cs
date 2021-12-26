@@ -43,7 +43,7 @@ public class ShadowMaskDebugRenderFeature : ScriptableRendererFeature
 			source = renderer.cameraColorTarget;
 			destination = renderer.cameraColorTarget;
 
-			DebugMaterial.SetTexture("_ShadowMaskTexture", ShadowMaskManager.Instance.GetMaskTexture());
+			//DebugMaterial.SetTexture("_ShadowMaskTexture", ShadowMaskManager.Instance.GetMaskTexture());
 
 			Blit(cmd, source, destination, DebugMaterial);
 

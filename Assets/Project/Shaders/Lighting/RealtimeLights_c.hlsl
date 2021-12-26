@@ -132,17 +132,17 @@ Light GetMainLight()
     return light;
 }
 
-Light GetMainLight(float4 shadowCoord)
+Light GetMainLight(float4 shadowCoord, float4 clipPos)
 {
     Light light = GetMainLight();
-    light.shadowAttenuation = MainLightRealtimeShadow(shadowCoord);
+    light.shadowAttenuation = MainLightRealtimeShadow(shadowCoord, clipPos);
     return light;
 }
 
-Light GetMainLight(float4 shadowCoord, float3 positionWS, half4 shadowMask)
+Light GetMainLight(float4 shadowCoord, float3 positionWS, float4 clipPos, half4 shadowMask)
 {
     Light light = GetMainLight();
-    light.shadowAttenuation = MainLightShadow(shadowCoord, positionWS, shadowMask, _MainLightOcclusionProbes);
+    light.shadowAttenuation = MainLightShadow(shadowCoord, positionWS, clipPos, shadowMask, _MainLightOcclusionProbes);
 
     #if defined(_LIGHT_COOKIES)
         real3 cookieColor = SampleMainLightCookie(positionWS);
@@ -152,9 +152,9 @@ Light GetMainLight(float4 shadowCoord, float3 positionWS, half4 shadowMask)
     return light;
 }
 
-Light GetMainLight(InputData inputData, half4 shadowMask, AmbientOcclusionFactor aoFactor)
+Light GetMainLight(InputData inputData, half4 clipPos, half4 shadowMask, AmbientOcclusionFactor aoFactor)
 {
-    Light light = GetMainLight(inputData.shadowCoord, inputData.positionWS, shadowMask);
+    Light light = GetMainLight(inputData.shadowCoord, inputData.positionWS, clipPos, shadowMask);
     
     #if defined(_SCREEN_SPACE_OCCLUSION) && !defined(_SURFACE_TYPE_TRANSPARENT)
     if (IsLightingFeatureEnabled(DEBUGLIGHTINGFEATUREFLAGS_AMBIENT_OCCLUSION))
@@ -277,7 +277,7 @@ Light GetAdditionalLight(uint i, float3 positionWS)
     return GetAdditionalPerObjectLight(lightIndex, positionWS);
 }
 
-Light GetAdditionalLight(uint i, float3 positionWS, half4 shadowMask)
+Light GetAdditionalLight(uint i, float3 positionWS, float4 clipPos, half4 shadowMask)
 {
 #if USE_CLUSTERED_LIGHTING
     int lightIndex = i;
@@ -291,7 +291,7 @@ Light GetAdditionalLight(uint i, float3 positionWS, half4 shadowMask)
 #else
     half4 occlusionProbeChannels = _AdditionalLightsOcclusionProbes[lightIndex];
 #endif
-    light.shadowAttenuation = AdditionalLightShadow(lightIndex, positionWS, light.direction, shadowMask, occlusionProbeChannels);
+    light.shadowAttenuation = AdditionalLightShadow(lightIndex, positionWS, clipPos, light.direction, shadowMask, occlusionProbeChannels);
 #if defined(_LIGHT_COOKIES)
     real3 cookieColor = SampleAdditionalLightCookie(lightIndex, positionWS);
     light.color *= cookieColor;
@@ -300,9 +300,9 @@ Light GetAdditionalLight(uint i, float3 positionWS, half4 shadowMask)
     return light;
 }
 
-Light GetAdditionalLight(uint i, InputData inputData, half4 shadowMask, AmbientOcclusionFactor aoFactor)
+Light GetAdditionalLight(uint i, InputData inputData, half4 clipPos, half4 shadowMask, AmbientOcclusionFactor aoFactor)
 {
-    Light light = GetAdditionalLight(i, inputData.positionWS, shadowMask);
+    Light light = GetAdditionalLight(i, inputData.positionWS, clipPos, shadowMask);
 
     #if defined(_SCREEN_SPACE_OCCLUSION) && !defined(_SURFACE_TYPE_TRANSPARENT)
     if (IsLightingFeatureEnabled(DEBUGLIGHTINGFEATUREFLAGS_AMBIENT_OCCLUSION))

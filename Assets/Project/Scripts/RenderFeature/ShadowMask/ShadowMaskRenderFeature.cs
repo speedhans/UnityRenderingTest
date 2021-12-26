@@ -47,11 +47,12 @@ public class ShadowMaskRenderFeature : ScriptableRendererFeature
 
 			m_Setting.m_ComputeShader.SetTexture(0, "_MaskTexture", m_RenderTexture);
 			m_Setting.m_ComputeShader.SetFloats("_TextureSize", new float[] { m_RenderTexture.width, m_RenderTexture.height });
-			m_Setting.m_ComputeShader.SetFloat("_CameraFar", Camera.main.farClipPlane);
 			m_Setting.m_ComputeShader.Dispatch(0, m_RenderTexture.width / 32, m_RenderTexture.height / 32, 1);
 
 			m_Setting.m_ComputeShader.SetTexture(1, "_MaskTexture", m_RenderTexture);
 			m_Setting.m_ComputeShader.Dispatch(1, m_RenderTexture.width / 4 / 32, m_RenderTexture.height / 4 / 32, 1);
+			
+			Shader.SetGlobalTexture("_ShadowMaskTexture", m_RenderTexture, RenderTextureSubElement.Color);
 		}
 	}
 

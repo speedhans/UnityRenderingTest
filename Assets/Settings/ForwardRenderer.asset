@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8faa94d65ed1dae45b5cf1cd3f98e0f7, type: 3}
   m_Name: ShadowMaskDebugRenderFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     Event: 600
     DebugMaterial: {fileID: 2100000, guid: a4f01de32cf5ab24c984d2f78981211b, type: 2}
