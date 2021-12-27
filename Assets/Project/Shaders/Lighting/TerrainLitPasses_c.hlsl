@@ -49,7 +49,6 @@ struct Varyings
 
     float4 clipPos                  : SV_POSITION;
 
-    float2 screenPos                : TEXCOORD10;
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
@@ -291,9 +290,6 @@ Varyings SplatmapVert(Attributes v)
         o.shadowCoord = GetShadowCoord(Attributes);
     #endif
 
-    float4 screenPos = ComputeScreenPos(o.clipPos);
-    o.screenPos = screenPos.xy / screenPos.w;
-
     return o;
 }
 
@@ -421,7 +417,7 @@ half4 SplatmapFragment(Varyings IN) : SV_TARGET
 
 #else
 
-    half4 color = UniversalFragmentPBR(inputData, IN.screenPos, albedo, metallic, /* specular */ half3(0.0h, 0.0h, 0.0h), smoothness, occlusion, /* emission */ half3(0, 0, 0), alpha);
+    half4 color = UniversalFragmentPBR(inputData, ComputeScreenPosByUV(IN.clipPos), albedo, metallic, /* specular */ half3(0.0h, 0.0h, 0.0h), smoothness, occlusion, /* emission */ half3(0, 0, 0), alpha);
 
     SplatmapFinalColor(color, inputData.fogCoord);
 

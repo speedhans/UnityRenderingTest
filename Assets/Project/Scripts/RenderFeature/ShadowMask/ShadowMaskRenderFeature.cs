@@ -48,14 +48,19 @@ public class ShadowMaskRenderFeature : ScriptableRendererFeature
 			if (m_RenderTexture == null)
 				return;
 
-			m_Setting.m_ComputeShader.SetTexture(0, "_MaskTexture", m_RenderTexture);
-			m_Setting.m_ComputeShader.SetFloats("_TextureSize", new float[] { m_RenderTexture.width, m_RenderTexture.height });
+			m_Setting.m_ComputeShader.SetTexture(0, "_ShadowMaskTexture", m_RenderTexture);
+			m_Setting.m_ComputeShader.SetFloats("_ShadowMaskTextureSize", new float[] { m_RenderTexture.width, m_RenderTexture.height });
 			m_Setting.m_ComputeShader.Dispatch(0, m_RenderTexture.width / 32, m_RenderTexture.height / 32, 1);
 
-			m_Setting.m_ComputeShader.SetTexture(1, "_MaskTexture", m_RenderTexture);
 			m_Setting.m_ComputeShader.SetFloat("_BlurOffset", m_BlurOffset);
+			m_Setting.m_ComputeShader.SetTexture(1, "_ShadowMaskTexture", m_RenderTexture);
 			m_Setting.m_ComputeShader.Dispatch(1, m_RenderTexture.width / 32, m_RenderTexture.height / 32, 1);
-			
+			m_Setting.m_ComputeShader.SetTexture(2, "_ShadowMaskTexture", m_RenderTexture);
+			m_Setting.m_ComputeShader.Dispatch(2, m_RenderTexture.width / 32, m_RenderTexture.height / 32, 1);
+
+			m_Setting.m_ComputeShader.Dispatch(1, m_RenderTexture.width / 32, m_RenderTexture.height / 32, 1);
+			//m_Setting.m_ComputeShader.Dispatch(2, m_RenderTexture.width / 32, m_RenderTexture.height / 32, 1);
+
 			Shader.SetGlobalTexture("_ShadowMaskTexture", m_RenderTexture, RenderTextureSubElement.Color);
 		}
 	}

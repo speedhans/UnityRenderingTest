@@ -57,16 +57,29 @@ SAMPLER_CMP(sampler_AdditionalLightsShadowmapTexture);
 // Shadow Mask
 TEXTURE2D(_ShadowMaskTexture); SAMPLER(sampler_ShadowMaskTexture); half4 _ShadowMaskTexture_ST;
 
-static float3 _MaskSamplingPoints[8] =
+static half3 _MaskSamplingPoints[8] =
 {
-    float3(1, 0, 0),
-    float3(-1, 0, 0),
-    float3(0, 1, 0),
-    float3(0, -1, 0),
-    float3(0.5, 0.5, 0),
-    float3(0.5, -0.5, 0),
-    float3(-0.5, 0.5, 0),
-    float3(-0.5, -0.5, 0),
+    half3(0.97, -0.314, 0),
+    half3(-0.874, 0.1458, 0),
+    half3(0.479, -0.1158, 0),
+    half3(0.9247, 0.3275, 0),
+    half3(-0.2745, -0.8721, 0),
+    half3(-0.4212, 0.8123, 0),
+    half3(0.5217, -0.4298, 0),
+    half3(-0.5, 0.5, 0),
+};
+
+
+static half _MaskSampleWeights[8] =
+{
+    0.2,
+    0.8,
+    0.4,
+    0.3,
+    0.9,
+    1.0,
+    0.1,
+    0.6
 };
 
 // GLES3 causes a performance regression in some devices when using CBUFFER.
@@ -259,29 +272,22 @@ real SampleShadowmapFilteredToMask(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_Sha
 {
     real attenuation = 0;
 
-    float v = 0.001;
+    half v = 0.001;
     attenuation = SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz);
 
-    float devide = 1;
-
-    //float2 uv = ComputeScreenPos(screenUV);
-    float edge = SAMPLE_TEXTURE2D(_ShadowMaskTexture, sampler_ShadowMaskTexture, screenUV).r;
-
-    //[branch] if (edge > 0)
-    //{
-    //    attenuation = SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz);
-    //}
+    half edge = SAMPLE_TEXTURE2D(_ShadowMaskTexture, sampler_ShadowMaskTexture, screenUV).r;
     [branch] if (edge > 0)
     {
-        [unroll] for (int i = 0; i < 8; ++i)
+        int count = 8;
+
+        [unroll] for (int i = 0; i < count; ++i)
         {
-            float2 poissonDisk = _MaskSamplingPoints[i] * v;
-            float2 offset = shadowCoord.xy;
-            offset += float2(poissonDisk.x - poissonDisk.y, poissonDisk.x + poissonDisk.y);
-            attenuation += SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, float3(offset, shadowCoord.z));
+            half2 poissonDisk = _MaskSamplingPoints[i] * v;
+            half2 offset = shadowCoord.xy;
+            offset += half2(poissonDisk.x - poissonDisk.y, poissonDisk.x + poissonDisk.y);
+            attenuation += SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, half3(offset, shadowCoord.z));
         }
-        devide += 8;
-        attenuation /= devide;
+        attenuation /= count + 1;
     }
 
     return attenuation;
@@ -547,3 +553,8 @@ half AdditionalLightRealtimeShadow(int lightIndex, float3 positionWS, float2 scr
 }
 
 #endif
+
+half2 ComputeScreenPosByUV(float4 _ClipPos)
+{
+    return _ClipPos.xy / _ScreenParams.xy;
+}
