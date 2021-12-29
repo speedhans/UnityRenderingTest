@@ -57,7 +57,10 @@ SAMPLER_CMP(sampler_AdditionalLightsShadowmapTexture);
 // Shadow Mask
 TEXTURE2D(_ShadowMaskTexture); SAMPLER(sampler_ShadowMaskTexture); half4 _ShadowMaskTexture_ST;
 
-static half3 _MaskSamplingPoints[8] =
+#define MASK_SAMPLING_COUNT 8
+#define MASK_BIAS 0.0005
+
+static half3 _MaskSamplingPoints[MASK_SAMPLING_COUNT] =
 {
     half3(0.97, -0.314, 0),
     half3(-0.874, 0.1458, 0),
@@ -65,21 +68,8 @@ static half3 _MaskSamplingPoints[8] =
     half3(0.9247, 0.3275, 0),
     half3(-0.2745, -0.8721, 0),
     half3(-0.4212, 0.8123, 0),
-    half3(0.5217, -0.4298, 0),
-    half3(-0.5, 0.5, 0),
-};
-
-
-static half _MaskSampleWeights[8] =
-{
-    0.2,
-    0.8,
-    0.4,
-    0.3,
-    0.9,
-    1.0,
-    0.1,
-    0.6
+    half3(0.5217, 0.4298, 0),
+    half3(-0.892, -0.881, 0),
 };
 
 // GLES3 causes a performance regression in some devices when using CBUFFER.
@@ -272,22 +262,21 @@ real SampleShadowmapFilteredToMask(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_Sha
 {
     real attenuation = 0;
 
-    half v = 0.001;
     attenuation = SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz);
 
     half edge = SAMPLE_TEXTURE2D(_ShadowMaskTexture, sampler_ShadowMaskTexture, screenUV).r;
-    [branch] if (edge > 0)
+    [branch] if (edge)
     {
-        int count = 8;
-
-        [unroll] for (int i = 0; i < count; ++i)
+        [unroll] for (int i = 0; i < MASK_SAMPLING_COUNT; ++i)
         {
-            half2 poissonDisk = _MaskSamplingPoints[i] * v;
+            half2 offsetPoint = _MaskSamplingPoints[i] * MASK_BIAS;
             half2 offset = shadowCoord.xy;
-            offset += half2(poissonDisk.x - poissonDisk.y, poissonDisk.x + poissonDisk.y);
+            offset += offsetPoint;//half2(poissonDisk.x - poissonDisk.y, poissonDisk.x + poissonDisk.y);
             attenuation += SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, half3(offset, shadowCoord.z));
         }
-        attenuation /= count + 1;
+        attenuation /= MASK_SAMPLING_COUNT + 1;
+
+        //attenuation = smoothstep(0.1, 0.9, attenuation);
     }
 
     return attenuation;

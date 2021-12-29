@@ -295,7 +295,7 @@ public class GrassRenderingSystem : MonoBehaviour
         m_CullingCS.SetBuffer(0, "_BasePositionDatas", m_PositionsBuffer);
         m_CullingCS.SetBuffer(0, "_VisibleInstancesID", m_VisibleInstanceBuffer);
 
-        m_CullingCS.Dispatch(0, Mathf.CeilToInt(m_GrassLocalPositions.Length / 64), 1, 1);
+        m_CullingCS.Dispatch(0, Mathf.Max(Mathf.CeilToInt(m_GrassLocalPositions.Length / 64), 1), 1, 1);
 
         m_DrawMaterial.SetVector("_CenterPosition", centerPos);
         m_DrawMaterial.SetBuffer("_VisibleIndex", m_VisibleInstanceBuffer);

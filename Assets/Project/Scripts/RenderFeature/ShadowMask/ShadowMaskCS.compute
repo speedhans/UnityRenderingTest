@@ -1,25 +1,25 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel ShadowMaskCS
 #pragma kernel ShadowMaskBlurCS
-#pragma kernel ShadowMaskBlurCS_Cross
 
 #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
 #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
 
 #include "CustomShadowMaskHelper.hlsl"
 
-half2 _uvOffset[4] =
+static half2 _uvOffset[8] =
 {
     half2(0, 1),
     half2(0, -1),
     half2(1, 0),
     half2(-1, 0),
-    //half2(1, 1),
-    //half2(1, -1),
-    //half2(-1, 1),
-    //half2(-1, -1),
+    half2(0.75, 0.75),
+    half2(0.75, -0.75),
+    half2(-0.75, 0.75),
+    half2(-0.75, -0.75),
 };
 
+float2 _DevideValue;
 float _BlurOffset;
 
 half ComputeShadowEdge(half2 pixelPos)
@@ -35,46 +35,34 @@ half ComputeShadowEdge(half2 pixelPos)
     return (atten < 0.8f && atten > 0.2f) ? 1 : 0;
 }
 
-[numthreads(32,32,1)]
+[numthreads(24,24,1)]
 void ShadowMaskCS(uint3 id : SV_DispatchThreadID)
 {
     [unroll] for (int i = 0; i < 4; ++i)
     {
-        half attenuation = ComputeShadowEdge(id.xy + i * 4);
-        _ShadowMaskTexture[id.xy + i * 4] = attenuation;
+        [unroll] for (int j = 0; j < 4; ++j)
+        {
+            half x = (id.x + i * _DevideValue.x);
+            half y = (id.y + j * _DevideValue.y);
+            half2 index = half2(x, y);
+            half attenuation = ComputeShadowEdge(index);
+            _ShadowMaskTexture[index] = attenuation;
+        }
     }
-    //half attenuation = ComputeShadowEdge(id.xy);
-    //_MaskTexture[id.xy] = attenuation;
 }
 
 
-[numthreads(32,32,1)]
+[numthreads(24,24,1)]
 void ShadowMaskBlurCS(uint3 id : SV_DispatchThreadID)
 {
     half2 index = id.xy;
     half offset = _BlurOffset;
 
-    float color = _ShadowMaskTexture[index + half2(offset, offset) * _ShadowMaskTextureSize];
-    color += _ShadowMaskTexture[index + half2(offset, offset) * _ShadowMaskTextureSize];
-    color += _ShadowMaskTexture[index + half2(offset, -offset) * _ShadowMaskTextureSize];
-    color += _ShadowMaskTexture[index + half2(-offset, offset) * _ShadowMaskTextureSize];
-    color += _ShadowMaskTexture[index + half2(-offset, -offset) * _ShadowMaskTextureSize];
+    float color = _ShadowMaskTexture[index];
+    [unroll] for (int i = 0; i < 8; ++i)
+    {
+        color += _ShadowMaskTexture[index + (_uvOffset[i] * offset) * _ShadowMaskTextureSize];
+    }
 
-    _ShadowMaskTexture[index] = color;// step(0.001, color);
-}
-
-
-[numthreads(32, 32, 1)]
-void ShadowMaskBlurCS_Cross(uint3 id : SV_DispatchThreadID)
-{
-    half2 index = id.xy;
-    half offset = _BlurOffset;
-
-    float color = _ShadowMaskTexture[index + half2(offset, offset) * _ShadowMaskTextureSize];
-    color += _ShadowMaskTexture[index + half2(offset, 0) * _ShadowMaskTextureSize];
-    color += _ShadowMaskTexture[index + half2(-offset, 0) * _ShadowMaskTextureSize];
-    color += _ShadowMaskTexture[index + half2(0, offset) * _ShadowMaskTextureSize];
-    color += _ShadowMaskTexture[index + half2(0, -offset) * _ShadowMaskTextureSize];
-
-    _ShadowMaskTexture[index] = color;//step(0.001, color);
+    _ShadowMaskTexture[index] = color;
 }
