@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class PositionUpdater : MonoBehaviour
 {
+    private void Start()
+    {
+        if (!GrassRenderingSystem.Instance)
+        {
+            this.enabled = false;
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
