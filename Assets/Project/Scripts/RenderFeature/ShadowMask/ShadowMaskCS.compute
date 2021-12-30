@@ -9,10 +9,10 @@
 
 static half2 _uvOffset[8] =
 {
-    half2(0, 1),
-    half2(0, -1),
-    half2(1, 0),
-    half2(-1, 0),
+    half2(0, 1.5),
+    half2(0, -1.5),
+    half2(1.5, 0),
+    half2(-1.5, 0),
     half2(0.75, 0.75),
     half2(0.75, -0.75),
     half2(-0.75, 0.75),

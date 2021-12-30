@@ -11,7 +11,7 @@ public class ShadowMaskRenderFeature : ScriptableRendererFeature
     {
 		public RenderPassEvent m_Pass;
 		public ComputeShader m_ComputeShader;
-		[Range(0, 5)] public float m_BlurOffset;
+		[Range(0, 10)] public float m_BlurOffset;
 		[Range(0, 4)] public int m_BlurPassCount;
 	}
 
@@ -39,8 +39,12 @@ public class ShadowMaskRenderFeature : ScriptableRendererFeature
             {
 				m_RenderTexture.Release();
 			}
-			
-			m_RenderTexture = new RenderTexture(Screen.width / 2, Screen.height / 2, 0, RenderTextureFormat.R8);//new RenderTexture(Screen.width / 2, Screen.height / 2, 0, RenderTextureFormat.R8);
+
+			int minSize = 256;
+			int rtSizeX = Mathf.Max(minSize, Screen.width / 4);
+			int rtSizeY = Mathf.Max(minSize, Screen.height / 4);
+
+			m_RenderTexture = new RenderTexture(rtSizeX, rtSizeY, 0, RenderTextureFormat.R8);//new RenderTexture(Screen.width / 2, Screen.height / 2, 0, RenderTextureFormat.R8);
 			m_RenderTexture.enableRandomWrite = true;
 
 #if UNITY_EDITOR
