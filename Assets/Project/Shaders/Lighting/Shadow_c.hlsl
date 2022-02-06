@@ -543,7 +543,7 @@ half AdditionalLightRealtimeShadow(int lightIndex, float3 positionWS, float2 scr
 
 #endif
 
-half2 ComputeScreenPosByUV(float4 _ClipPos)
+half2 ComputeScreenUV(float4 _ClipPos)
 {
     return _ClipPos.xy / _ScreenParams.xy;
 }

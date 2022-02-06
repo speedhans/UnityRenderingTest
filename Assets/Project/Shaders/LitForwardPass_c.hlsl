@@ -221,7 +221,7 @@ half4 LitPassFragment(Varyings input) : SV_Target
     ApplyDecalToSurfaceData(input.positionCS, surfaceData, inputData);
 #endif
 
-    half4 color = UniversalFragmentPBR(inputData, surfaceData, ComputeScreenPosByUV(input.positionCS));
+    half4 color = UniversalFragmentPBR(inputData, surfaceData, ComputeScreenUV(input.positionCS));
 
     color.rgb = MixFog(color.rgb, inputData.fogCoord);
     color.a = OutputAlpha(color.a, _Surface);

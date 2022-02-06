@@ -70,7 +70,6 @@
                 half3  normalWS                 : TEXCOORD3;
         //#ifdef _MAIN_LIGHT_SHADOWS
                 float4 shadowCoord              : TEXCOORD6; // compute shadow coord per-vertex for the main light
-                float2 screenUV                 : TEXCOORD7;
         //#endif
                 float4 positionCS               : SV_POSITION;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -101,8 +100,6 @@
                 o.positionWSAndFogFactor = float4(posWS, fogFactor);
 //#ifdef _MAIN_LIGHT_SHADOWS
                 o.shadowCoord = TransformWorldToShadowCoord(posWS);
-                float4 screenPos = ComputeScreenPos(o.positionCS);
-                o.screenUV = screenPos.xy / screenPos.w;
 //#endif
                 o.uv = v.uv;
 
@@ -119,7 +116,7 @@
             half4 frag(Varyings v) : SV_Target
             {
 //#ifdef _MAIN_LIGHT_SHADOWS 
-                Light mainLight = GetMainLight(v.shadowCoord, v.screenUV);
+                Light mainLight = GetMainLight(v.shadowCoord, ComputeScreenUV(v.positionCS));
 //#else
 //                Light mainLight = GetMainLight();
 //#endif
