@@ -8,6 +8,12 @@ using Random = UnityEngine.Random;
 [ExecuteAlways]
 public class CloudRenderer : MonoBehaviour
 {
+    [SerializeField]
+    [Range(0.0f, 1.0f)] float m_TimeOfDay;
+    [SerializeField] AnimationCurve m_TimeOfDayGraph;
+    [SerializeField] Color m_StartColor;
+    [SerializeField] Color m_EndColor;
+
     public Mesh[] cloudMeshes;
     public Material cloudMaterial;
     public ParticleSystem ps;
@@ -29,6 +35,7 @@ public class CloudRenderer : MonoBehaviour
         {
             mpbs[index] = new MaterialPropertyBlock();
         }
+
     }
 
     private void OnDisable()
@@ -47,7 +54,7 @@ public class CloudRenderer : MonoBehaviour
     public void DrawClouds(Camera camera)
     {
         if (!cloudMaterial || cloudMeshes == null || cloudMeshes.Length == 0 || particles.Length == 0) return;
-        
+
         var camPos = camera.transform.position;
         var aliveCount = ps.GetParticles(particles);
         particles.OrderByDescending(x => Vector3.Distance(x.position, camPos));
@@ -69,7 +76,9 @@ public class CloudRenderer : MonoBehaviour
             scale.x *= Random.value > 0.5f ? 1f : -1f;
             
             mpbs[index].SetVector("_BA_CloudData", new Vector4(scale.x, 0f, 0f, particle.GetCurrentColor(ps).a / 255f));
-            
+            mpbs[index].SetColor("_Albedo", Color.Lerp(m_StartColor, m_EndColor, m_TimeOfDayGraph.Evaluate(m_TimeOfDay)));
+
+
             Graphics.DrawMesh(mesh, Matrix4x4.TRS(pos, q, scale * SkyboxSystem.SkyboxScale),
                 cloudMaterial, LayerMask.NameToLayer("3DSkybox"), camera, 0, mpbs[index], false, false, false);
         }

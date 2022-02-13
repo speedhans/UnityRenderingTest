@@ -7,13 +7,12 @@ Shader "Custom/CloudsShader"
         _LightingPow ("LightingPow", Range(-0.5,2)) = 0.0
         _Density ("Density", float) = 1.0
         _AmbientIntensity("AmbientIntensity", float) = 1.0
+        _Albedo("Albedo", Color) = (1,1,1,1)
         _Tint ("Tint", Color) = (1,1,1,1)
         _Thickness("Thickness", float ) = 1.0
         _HightFogOffset("HightFogOffset", float) = 1.0
         _HightFogDistance("HightFogDistance", float) = 1.0
         _StartEndDepthFade("Start/End Depth Fade", Vector) = (0,1,0,0)
-        [Toggle]_SoftParticles("SoftParticles", float) = 0.0
-        [Toggle]_BlueNoise("BlueNoise", float) = 0.0
 
         [Enum(UnityEngine.Rendering.BlendMode)]_SrcBlend("SrcBlend Mode", Float) = 5 // SrcAlpha
         [Enum(UnityEngine.Rendering.BlendMode)]_DstBlend("DstBlend Mode", Float) = 1 // One
@@ -75,13 +74,12 @@ Shader "Custom/CloudsShader"
             float _LightingPow;
             float _Density;
             float _AmbientIntensity;
+            float4 _Albedo;
             float4 _Tint;
             float _Thickness;
             float _HightFogOffset;
             float _HightFogDistance;
             float2 _StartEndDepthFade;
-            float _SoftParticles;
-            float _BlueNoise;
 
             v2f vert (appdata v)
             {
@@ -194,7 +192,7 @@ Shader "Custom/CloudsShader"
                 half4 LURD = SAMPLE_TEXTURE2D(_TextureLURD, sampler_TextureLURD, i.uv);
                 half4 FBDA = SAMPLE_TEXTURE2D(_TextureFBDA, sampler_TextureFBDA, i.uv);
 
-                clip(FBDA.w - 0.05);
+                //clip(FBDA.w - 0.05);
 
                 //------- Color Field ------------
                 float lightmap = ComputeLightMap(tangentLight, LURD.x, LURD.z, LURD.y, LURD.w, FBDA.x, FBDA.y);
@@ -205,7 +203,7 @@ Shader "Custom/CloudsShader"
                 float3 ambient = SampleSH(SafeNormalize(float3(1, lightmap, 1))) * _AmbientIntensity;
 
                 float3 finalColor = mainLight.color * (RimLight * directLighting) + ambient * _Tint.xyz;
-                finalColor = CustomMixFog(finalColor, i.positionWS);
+                finalColor = CustomMixFog(finalColor, i.positionWS) * _Albedo.xyz;
                 //---------------------------------
 
                 float depth = FBDA.z;
