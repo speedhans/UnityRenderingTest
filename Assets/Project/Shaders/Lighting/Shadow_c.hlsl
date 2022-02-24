@@ -59,6 +59,7 @@ TEXTURE2D(_ShadowMaskTexture); SAMPLER(sampler_ShadowMaskTexture); half4 _Shadow
 
 #define MASK_SAMPLING_COUNT 8
 #define MASK_BIAS 0.0005
+//#define POISSON_SAMPLE;
 
 static half3 _MaskSamplingPoints[MASK_SAMPLING_COUNT] =
 {
@@ -265,19 +266,34 @@ real SampleShadowmapFilteredToMask(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_Sha
     attenuation = SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz);
 
     half edge = SAMPLE_TEXTURE2D(_ShadowMaskTexture, sampler_ShadowMaskTexture, screenUV).r;
+
+#if defined(POISSON_SAMPLE)
     [branch] if (edge)
     {
+        float visibility = 1.0f;
+        [unroll] for (int i = 0; i < MASK_SAMPLING_COUNT; ++i)
+        {
+            half2 offsetPoint = _MaskSamplingPoints[i] * 0.001;// MASK_BIAS;
+            half2 offset = shadowCoord.xy;
+            offset += offsetPoint;
+            visibility -= 0.2f * (1.0f - SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, half3(offset, shadowCoord.z)));
+        }
+        attenuation *= visibility;
+    }
+#else
+    [branch] if (edge)
+    {
+        float visibility = 1.0f;
         [unroll] for (int i = 0; i < MASK_SAMPLING_COUNT; ++i)
         {
             half2 offsetPoint = _MaskSamplingPoints[i] * MASK_BIAS;
             half2 offset = shadowCoord.xy;
-            offset += offsetPoint;//half2(poissonDisk.x - poissonDisk.y, poissonDisk.x + poissonDisk.y);
+            offset += offsetPoint;
             attenuation += SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, half3(offset, shadowCoord.z));
         }
         attenuation /= MASK_SAMPLING_COUNT + 1;
-
-        //attenuation = smoothstep(0.1, 0.9, attenuation);
     }
+#endif
 
     return attenuation;
 }

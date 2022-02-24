@@ -17,12 +17,12 @@ public class Rotator : MonoBehaviour
     void Update()
     {
         Vector3 rot = m_Transform.eulerAngles;
-        rot.y += Time.deltaTime * m_Speed;
+        rot.z += Time.deltaTime * m_Speed;
 
-        if (rot.y > 360.0f)
-            rot.y -= 360.0f;
-        else if (rot.y < 0.0f)
-            rot.y += 360.0f;
+        if (rot.z > 360.0f)
+            rot.z -= 360.0f;
+        else if (rot.z < 0.0f)
+            rot.z += 360.0f;
 
         m_Transform.rotation = Quaternion.Euler(rot);
     }

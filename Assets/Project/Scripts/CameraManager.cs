@@ -49,7 +49,7 @@ public class CameraManager : MonoBehaviour
 
     float ClampPitch(float _Value)
     {
-        return Mathf.Clamp(_Value, -15.0f, 45.0f);
+        return Mathf.Clamp(_Value, -15.0f, 60.0f);
     }
 
     float ClampYaw(float _Value)

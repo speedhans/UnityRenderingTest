@@ -1,4 +1,6 @@
 using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -9,10 +11,9 @@ using Random = UnityEngine.Random;
 public class CloudRenderer : MonoBehaviour
 {
     [SerializeField]
-    [Range(0.0f, 1.0f)] float m_TimeOfDay;
+    [Range(0.0f, 1.0f)] float m_TimeOfDay = 0.5f;
     [SerializeField] AnimationCurve m_TimeOfDayGraph;
-    [SerializeField] Color m_StartColor;
-    [SerializeField] Color m_EndColor;
+    [SerializeField] Gradient m_CloudsColor;
 
     public Mesh[] cloudMeshes;
     public Material cloudMaterial;
@@ -61,6 +62,8 @@ public class CloudRenderer : MonoBehaviour
         
         var scale = Vector3.zero;
 
+        Color cloudsColr = m_CloudsColor.Evaluate(m_TimeOfDayGraph.Evaluate(m_TimeOfDay == 1.0f ? 0.0f : m_TimeOfDay));
+
         for (var index = 0; index < aliveCount; index++)
         {
             var particle = particles[index];
@@ -76,7 +79,7 @@ public class CloudRenderer : MonoBehaviour
             scale.x *= Random.value > 0.5f ? 1f : -1f;
             
             mpbs[index].SetVector("_BA_CloudData", new Vector4(scale.x, 0f, 0f, particle.GetCurrentColor(ps).a / 255f));
-            mpbs[index].SetColor("_Albedo", Color.Lerp(m_StartColor, m_EndColor, m_TimeOfDayGraph.Evaluate(m_TimeOfDay)));
+            mpbs[index].SetColor("_Albedo", cloudsColr);
 
 
             Graphics.DrawMesh(mesh, Matrix4x4.TRS(pos, q, scale * SkyboxSystem.SkyboxScale),
