@@ -28,7 +28,7 @@ public class CameraManager : MonoBehaviour
 
     void CameraUpdate(CinemachineBrain _Brain)
     {
-
+        m_CurrentCinemachineTransposer.m_FollowOffset = Quaternion.Euler(ClampPitch(m_Pitch), ClampYaw(m_Yaw), 0.0f) * Vector3.back * m_Distance;
     }
 
     public void SetBrainCamera(CinemachineBrain _Brain) { m_BrainCamera = _Brain; }

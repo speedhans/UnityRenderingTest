@@ -59,7 +59,7 @@ TEXTURE2D(_ShadowMaskTexture); SAMPLER(sampler_ShadowMaskTexture); half4 _Shadow
 
 #define MASK_SAMPLING_COUNT 8
 #define MASK_BIAS 0.0005
-//#define POISSON_SAMPLE;
+#define POISSON_SAMPLE;
 
 static half3 _MaskSamplingPoints[MASK_SAMPLING_COUNT] =
 {
@@ -72,6 +72,43 @@ static half3 _MaskSamplingPoints[MASK_SAMPLING_COUNT] =
     half3(0.5217, 0.4298, 0),
     half3(-0.892, -0.881, 0),
 };
+
+
+static const float2 _PoissonOffsets[32] = {
+    float2(0.06407013, 0.05409927),
+    float2(0.7366577, 0.5789394),
+    float2(-0.6270542, -0.5320278),
+    float2(-0.4096107, 0.8411095),
+    float2(0.6849564, -0.4990818),
+    float2(-0.874181, -0.04579735),
+    float2(0.9989998, 0.0009880066),
+    float2(-0.004920578, -0.9151649),
+    float2(0.1805763, 0.9747483),
+    float2(-0.2138451, 0.2635818),
+    float2(0.109845, 0.3884785),
+    float2(0.06876755, -0.3581074),
+    float2(0.374073, -0.7661266),
+    float2(0.3079132, -0.1216763),
+    float2(-0.3794335, -0.8271583),
+    float2(-0.203878, -0.07715034),
+    float2(0.5912697, 0.1469799),
+    float2(-0.88069, 0.3031784),
+    float2(0.5040108, 0.8283722),
+    float2(-0.5844124, 0.5494877),
+    float2(0.6017799, -0.1726654),
+    float2(-0.5554981, 0.1559997),
+    float2(-0.3016369, -0.3900928),
+    float2(-0.5550632, -0.1723762),
+    float2(0.925029, 0.2995041),
+    float2(-0.2473137, 0.5538505),
+    float2(0.9183037, -0.2862392),
+    float2(0.2469421, 0.6718712),
+    float2(0.3916397, -0.4328209),
+    float2(-0.03576927, -0.6220032),
+    float2(-0.04661255, 0.7995201),
+    float2(0.4402924, 0.3640312),
+};
+
 
 // GLES3 causes a performance regression in some devices when using CBUFFER.
 #ifndef SHADER_API_GLES3
@@ -263,24 +300,33 @@ real SampleShadowmapFilteredToMask(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_Sha
 {
     real attenuation = 0;
 
-    attenuation = SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz);
-
     half edge = SAMPLE_TEXTURE2D(_ShadowMaskTexture, sampler_ShadowMaskTexture, screenUV).r;
 
 #if defined(POISSON_SAMPLE)
-    [branch] if (edge)
+
+    attenuation = 1;
+
+    if (edge)
     {
-        float visibility = 1.0f;
-        [unroll] for (int i = 0; i < MASK_SAMPLING_COUNT; ++i)
+        [unroll] for (int i = 0; i < 4; ++i)
         {
-            half2 offsetPoint = _MaskSamplingPoints[i] * 0.001;// MASK_BIAS;
+            float dot_product = dot(float4(screenUV.xyy, i), float4(12.9898, 78.233, 45.164, 94.673));
+            float seed = frac(sin(dot_product) * 43758.5453);
+            
+            int index = (32 * seed) % 32;
+
+            half2 offsetPoint = _PoissonOffsets[index] / 700.0f * shadowCoord.z;// MASK_BIAS;
             half2 offset = shadowCoord.xy;
             offset += offsetPoint;
-            visibility -= 0.2f * (1.0f - SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, half3(offset, shadowCoord.z)));
+            attenuation -= 0.2f * (1.0f - SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, half3(offset, shadowCoord.z)));
         }
-        attenuation *= visibility;
     }
+    else
+        attenuation -= 0.8 * (1.0f - SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz));
 #else
+
+    attenuation = SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz);
+
     [branch] if (edge)
     {
         float visibility = 1.0f;
