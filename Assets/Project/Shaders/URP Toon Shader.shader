@@ -24,6 +24,13 @@
 
         Pass
         {
+            Stencil
+            {
+                Ref 1
+                Comp Always
+                Pass Replace
+            }
+
             Name "URP Toon"
             Tags { "LightMode" = "UniversalForward" }
 
