@@ -5,6 +5,8 @@ Shader "Custom/SSDecal"
         _MainTex ("Texture", 2D) = "white" {}
         _StencilRef("_StencilRef", float) = 0
         [Enum(UnityEngine.Rendering.CompareFunction)]_StencilComp("_StencilComp", float) = 0
+        [Enum(UnityEngine.Rendering.CullMode)]_Cull("_Cull", float) = 1
+        [Enum(UnityEngine.Rendering.CompareFunction)]_ZTest("_ZTest", float) = 0
     }
     SubShader
     {
@@ -13,13 +15,16 @@ Shader "Custom/SSDecal"
 
         Pass
         {
-            Stencil
-            {
-                Ref[_StencilRef]
-                Comp[_StencilComp]
-                Pass Replace
-            }
-            
+            //Stencil
+            //{
+            //    Ref[_StencilRef]
+            //    Comp[_StencilComp]
+            //    //Pass Replace
+            //}
+
+            Cull [_Cull]
+            ZTest [_ZTest]
+            ZWrite Off
             Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM

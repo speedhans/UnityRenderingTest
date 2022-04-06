@@ -4,6 +4,7 @@
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Shadow/ShadowSamplingTent.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 
 #define MAX_SHADOW_CASCADES 4
 
@@ -298,15 +299,15 @@ real SampleShadowmapFiltered(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_ShadowMap
 
 real SampleShadowmapFilteredToMask(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_ShadowMap), float4 shadowCoord, float2 screenUV, ShadowSamplingData samplingData)
 {
-    real attenuation = 0;
+    real attenuation = 1;
 
     half edge = SAMPLE_TEXTURE2D(_ShadowMaskTexture, sampler_ShadowMaskTexture, screenUV).r;
-
+    half depth = SAMPLE_TEXTURE2D_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, screenUV, 0).r;
 #if defined(POISSON_SAMPLE)
 
-    attenuation = 1;
+    //attenuation = SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz);
 
-    if (edge)
+    [branch] if (edge)
     {
         [unroll] for (int i = 0; i < 4; ++i)
         {
@@ -315,14 +316,14 @@ real SampleShadowmapFilteredToMask(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_Sha
             
             int index = (32 * seed) % 32;
 
-            half2 offsetPoint = _PoissonOffsets[index] / 700.0f * shadowCoord.z;// MASK_BIAS;
+            half2 offsetPoint = _PoissonOffsets[index] * 0.0008f;// MASK_BIAS;
             half2 offset = shadowCoord.xy;
             offset += offsetPoint;
-            attenuation -= 0.2f * (1.0f - SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, half3(offset, shadowCoord.z)));
+            attenuation -= 0.25f * (1 - SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, half3(offset, shadowCoord.z)));
         }
     }
     else
-        attenuation -= 0.8 * (1.0f - SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz));
+        attenuation -= 1 - SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz);
 #else
 
     attenuation = SAMPLE_TEXTURE2D_SHADOW(ShadowMap, sampler_ShadowMap, shadowCoord.xyz);
