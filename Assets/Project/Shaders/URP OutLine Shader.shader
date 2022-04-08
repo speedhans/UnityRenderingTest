@@ -15,6 +15,13 @@
 
         Pass
         {
+            Stencil
+            {
+                Ref 1
+                Comp Always
+                Pass Replace
+            }
+
             Name "OutLine"
             Tags { "LightMode" = "UniversalForward" }
 

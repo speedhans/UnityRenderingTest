@@ -9,10 +9,10 @@
 
 static half2 _uvOffset[8] =
 {
-    half2(0, 1.5),
-    half2(0, -1.5),
-    half2(1.5, 0),
-    half2(-1.5, 0),
+    half2(0, 1),
+    half2(0, -1),
+    half2(1, 0),
+    half2(-1, 0),
     half2(0.75, 0.75),
     half2(0.75, -0.75),
     half2(-0.75, 0.75),
@@ -24,13 +24,17 @@ float _BlurOffset;
 
 half ComputeShadowEdge(half2 pixelPos)
 {
-    half atten = SampleShadowAttenuation(pixelPos / _ShadowMaskTextureSize);
+    float depth = GetSceneDepth(pixelPos / _ShadowMaskTextureSize);
+
+    //depth = 1 - depth;
+
+    half atten = 0;// SampleShadowAttenuation(pixelPos / _ShadowMaskTextureSize);
     [unroll] for (int i = 0; i < 4; ++i)
     {
         atten += SampleShadowAttenuation((pixelPos + _uvOffset[i]) / _ShadowMaskTextureSize);
     }
 
-    atten /= 5;
+    atten /= 4;
 
     return (atten < 0.8f && atten > 0.2f) ? 1 : 0;
 }

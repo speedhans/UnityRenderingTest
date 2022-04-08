@@ -14,6 +14,12 @@ float LinearEyeDepth_(float In)
     return 1.0 / (_ZBufferParams.z * In + _ZBufferParams.w);
 }
 
+float GetSceneDepth(half2 uv)
+{
+    return LinearEyeDepth_(SAMPLE_TEXTURE2D_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, uv, 0).r);
+}
+
+
 real SampleShadowmap_(TEXTURE2D_SHADOW_PARAM(ShadowMap, sampler_ShadowMap), float4 shadowCoord, half4 shadowParams)
 {
     real attenuation;
